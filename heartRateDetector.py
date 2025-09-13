@@ -42,8 +42,8 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    cap.release()
-    cv2.destroyAllWindows()
+cap.release()
+cv2.destroyAllWindows()
 
 greenValues = np.array(greenValues)
 timeStamps = np.array(timeStamps)
@@ -52,7 +52,19 @@ fps = len(greenValues) / duration
 resampled_times = np.linspace(timeStamps[0], timeStamps[-1], len(greenValues))
 resampled_signal = np.interp(resampled_times, timeStamps, greenValues)
 
-b, a = scipy.signal.butter(3, [0.7 / (0.5*fps), 4 / (0.5*fps)], btype='band')
+lowcut = 0.7
+highcut = 4.0
+
+nyquist = 0.5*fps
+low = lowcut/nyquist
+high = highcut/nyquist
+
+if high >= 1:
+    high = 0.99
+if low <= 0:
+    low = 0.01
+
+b, a = scipy.signal.butter(3, [low, high], btype='band')
 filtered = scipy.signal.filtfilt(b, a, resampled_signal)
 
 fft = np.abs(np.fft.rfft(filtered))

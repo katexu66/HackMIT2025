@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
 
 load_dotenv()
 
@@ -50,7 +51,7 @@ def gcal_list(
     max_results: int = 10
 ) -> List[Dict[str, Any]]:
     """
-    List events. ISO 8601 for time_min/time_max (e.g., '2025-09-13T00:00:00-07:00').
+    List events in Google Calendar. ISO 8601 for time_min/time_max (e.g., '2025-09-13T00:00:00-07:00').
     q: optional free-text search
     """
     svc = _get_service()
@@ -96,7 +97,7 @@ def gcal_create(
     attendees: Optional[List[str]] = None
 ) -> Dict[str, Any]:
     """
-    Create an event. Provide start_iso/end_iso as ISO strings with timezone,
+    Create an event in Google Calendar. Provide start_iso/end_iso as ISO strings with timezone,
     e.g. '2025-09-13T15:00:00-07:00'.
     """
     svc = _get_service()
@@ -115,14 +116,14 @@ def gcal_create(
 
 @mcp.tool
 def gcal_delete(event_id: str) -> str:
-    """Delete an event by id."""
+    """Delete an event in Google Calendar by id."""
     svc = _get_service()
     svc.events().delete(calendarId=CALENDAR_ID, eventId=event_id).execute()
     return f"deleted {event_id}"
 
 @mcp.tool
 def gcal_calendars() -> List[Dict[str, Any]]:
-    """List your calendars (id + summary)."""
+    """List your Google calendars (id + summary)."""
     svc = _get_service()
     resp = svc.calendarList().list().execute()
     return [{"id": c.get("id"), "summary": c.get("summary")} for c in resp.get("items", [])]
